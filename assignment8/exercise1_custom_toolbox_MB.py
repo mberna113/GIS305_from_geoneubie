@@ -13,7 +13,7 @@ def buffer_layer(input_gdb, input_layer, dist):
 
     # Distance units are always miles
     units = " miles"
-    dist = dist + units
+    dist = str(dist) + units
     # Output layer will always be named input layer + "_buf
     output_layer = input_gdb + input_layer + "_buf"
     # Always use buffer parameters FULL, ROUND, ALL
@@ -25,7 +25,7 @@ def buffer_layer(input_gdb, input_layer, dist):
 
 def main():
     # Define your workspace and point it at the modelbuilder.gdb
-    gdb = r"C:\Users\micha\Desktop\School\GIS_305_Programming_forGIS\Assignment 8\Assignment 8\Assignment 8.gdb\\"
+    gdb = "C:\\Users\\micha\\Desktop\\School\\GIS_305_Programming_forGIS\\Assignment 8\\Assignment 8\\Assignment 8.gdb\\"
     arcpy.env.workspace = gdb
     arcpy.env.overwriteOutput = True
 
@@ -67,9 +67,26 @@ def main():
     aprx = arcpy.mp.ArcGISProject(
         r"C:\Users\micha\Desktop\School\GIS_305_Programming_forGIS\Assignment 8\Assignment 8\Assignment 8.aprx")
     map_doc = aprx.listMaps()[0]
-    map_doc.addDataFromPath(rf"{gdb}{intersect_lyr_name}")
+    map_doc.addDataFromPath(f"C:\\Users\\micha\\Desktop\\School\\GIS_305_Programming_forGIS\\Assignment 8\\Assignment 8\\Assignment 8.gdb\\{intersect_lyr_name}")
 
-    aprx.save()
+    # Get the first available map
+    map_doc = aprx.listMaps()[0]
+
+    # Define full path to the feature class
+    intersect_full_path = f"{gdb}{intersect_lyr_name}"
+
+    # Ensure the feature class exists before adding it
+    if arcpy.Exists(intersect_full_path):
+        # Create a feature layer in memory
+        arcpy.management.MakeFeatureLayer(intersect_full_path, intersect_lyr_name)
+
+        # Add the feature class from the GDB to the map
+        map_doc.addDataFromPath(intersect_full_path)
+        arcpy.AddMessage(f"Layer {intersect_lyr_name} added using addDataFromPath().")
+    else:
+        arcpy.AddError(f"Error: Layer {intersect_lyr_name} does NOT exist.")
+
+    #aprx.save()
 
 
 if __name__ == '__main__':
